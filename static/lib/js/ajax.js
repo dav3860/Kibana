@@ -8,7 +8,7 @@ $(document).ready(function () {
   window.graph_colors = ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"]
 
   // Hide sidebar by default
-  sbctl('hide',false);
+  sbctl('hide',true);
 
   // Handle AJAX errors
   $("div#logs").ajaxError(function (e, xhr, settings, exception) {
