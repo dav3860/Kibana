@@ -17,7 +17,7 @@ module KibanaConfig
 
   # The adress ip Kibana should listen on. Comment out or set to
   # 0.0.0.0 to listen on all interfaces.
-  KibanaHost = '0.0.0.0'
+  KibanaHost = '127.0.0.1'
 
   # The record type as defined in your logstash configuration.
   # Seperate multiple types with a comma, no spaces. Leave blank
@@ -25,7 +25,7 @@ module KibanaConfig
   Type = ''
 
   # Results to show per page
-  Per_page = 50
+  Per_page = 100
 
   # Timezone. Leave this set to 'user' to have the user's browser autocorrect.
   # Otherwise, set a timezone string
@@ -36,11 +36,12 @@ module KibanaConfig
   # Format for timestamps. Defaults to mm/dd HH:MM:ss.
   # For syntax see: http://blog.stevenlevithan.com/archives/date-time-format
   # Time_format = 'isoDateTime' 
-  Time_format = 'mm/dd HH:MM:ss'
+  Time_format = 'mm/dd HH:MM:ss.l'
 
   # Change which fields are shown by default. Must be set as an array
   # Default_fields = ['@fields.vhost','@fields.response','@fields.request']
-  Default_fields = ['@message']
+#  Default_fields = ['@timestamp','@fields.host','@fields.syslog_facility','@fields.syslog_severity','@message']
+  Default_fields = ['@source_host','@message']
 
   # If set to true, Kibana will use the Highlight feature of Elasticsearch to 
   # display highlighted search results
@@ -59,20 +60,20 @@ module KibanaConfig
   # Hungary is translated to capital OR of OR Hungary, and with default
   # operator of AND, the same query is translated to capital AND of AND
   # Hungary. The default value is OR.
-  Default_operator = 'OR'
+  Default_operator = 'AND'
 
   # When using analyze, use this many of the most recent
   # results for user's query
-  Analyze_limit = 2000
+  Analyze_limit = 20000
 
   # Show this many results in analyze/trend/terms/stats modes
-  Analyze_show = 25
+  Analyze_show = 50
 
   # Show this many results in an rss feed
-  Rss_show = 25
+  Rss_show = 50
 
   # Show this many results in an exported file
-  Export_show = 2000
+  Export_show = 20000
 
   # Delimit exported file fields with what?
   # You may want to change this to something like "\t" (tab) if you have
@@ -113,7 +114,7 @@ module KibanaConfig
   # Kibana will use for the "Stats" and "Terms" to prevent ES crashes. For very
   # large data sets and undersized ES clusers, a limit of 1 is not unreasonable.
   # Default is 0 (unlimited)
-  Facet_index_limit = 0
+  Facet_index_limit = 15
 
   # You probably don't want to touch anything below this line
   # unless you really know what you're doing
@@ -136,28 +137,28 @@ module KibanaConfig
   Allow_iframed = false
 
   # Authentication Module
-  Auth_module = 'elasticsearch'
+  Auth_module = 'ldap'
 
-  # Users and groups management Module
   Users_module = 'elasticsearch'
 
   Auth_Admin_User  = 'kibana'
-  Auth_Admin_Pass  = 'password'
+  Auth_Admin_Pass  = 'PrevoirK1b@na'
   Auth_Admin_Perms  = { 'is_admin' => true, 'enabled' => true, 'tags' => ['*'] }
 
   # Authentication options for the auth_ldap module
-  Ldap_host = '127.0.0.1'
+  Ldap_host = 'dc1.intranet.prevoir'
   Ldap_port = 389
-  # Adds a '@domain.local' suffix to the username when authenticating against an LDAP directory
-  # Ldap_domain_fqdn = 'domain.local'
+  Ldap_user_base = 'OU=Siege,OU=France,DC=intranet,DC=prevoir'
+  Ldap_group_base = 'OU=Siege,OU=France,DC=intranet,DC=prevoir'
+  Ldap_domain_fqdn = "intranet.prevoir"
 
   # Storage Module
   Storage_module = 'elasticsearch'  # mongo
 
-  #Mongo_host = '127.0.0.1'
-  #Mongo_port = 27017
-  #Mongo_db = 'kibana'
+  Mongo_host = '127.0.0.1'
+  Mongo_port = 27017
+  Mongo_db = 'kibana'
 
-  # Use this interval as fallback if the client's request in not valid.
+  # Use this interval as fallback.
   Fallback_interval = 900
 end
