@@ -307,10 +307,11 @@ class KibanaApp < Sinatra::Base
     segment = params[:segment].nil? ? 0 : params[:segment].to_i
 
     req     = ClientRequest.new(params[:hash])
+    puts req.to_s()
     if KibanaConfig::Highlight_results
-      query   = HighlightedQuery.new(req.search,req.from,req.to,req.offset)
+      query   = HighlightedQuery.new(req.search,@user_perms,req.from,req.to,req.offset)
     else
-      query   = SortedQuery.new(req.search,req.from,req.to,req.offset)
+      query   = SortedQuery.new(req.search,@user_perms,req.from,req.to,req.offset)
     end
     indices = Kelastic.index_range(req.from,req.to)
     result  = KelasticMulti.new(query,indices)
@@ -333,10 +334,10 @@ class KibanaApp < Sinatra::Base
     case params[:mode]
     when "count"
       query   = DateHistogram.new(
-        req.search,req.from,req.to,params[:interval].to_i)
+        req.search,@user_perms,req.from,req.to,params[:interval].to_i)
     when "mean"
       query   = StatsHistogram.new(
-        req.search,req.from,req.to,req.analyze,params[:interval].to_i)
+        req.search,@user_perms,req.from,req.to,req.analyze,params[:interval].to_i)
     end
     indices = Kelastic.index_range(req.from,req.to)
     result  = KelasticSegment.new(query,indices,segment)
@@ -348,7 +349,7 @@ class KibanaApp < Sinatra::Base
     ## TODO: Make this verify that the index matches the smart index pattern.
     id      = params[:id]
     index   = "#{params[:index]}"
-    query   = IDQuery.new(id)
+    query   = IDQuery.new(id,@user_perms)
     result  = Kelastic.new(query,index)
     JSON.generate(result.response)
   end
@@ -359,7 +360,7 @@ class KibanaApp < Sinatra::Base
     req           = ClientRequest.new(params[:hash])
 
     query_end     = SortedQuery.new(
-      req.search,req.from,req.to,0,limit,'@timestamp','desc')
+      req.search,@user_perms,req.from,req.to,0,limit,'@timestamp','desc')
     indices_end   = Kelastic.index_range(req.from,req.to)
     result_end    = KelasticMulti.new(query_end,indices_end)
 
@@ -367,7 +368,7 @@ class KibanaApp < Sinatra::Base
     if (result_end.response['hits']['hits'].length < limit)
       limit         = (result_end.response['hits']['hits'].length / 2).to_i
       query_end     = SortedQuery.new(
-        req.search,req.from,req.to,0,limit,'@timestamp','desc')
+        req.search,@user_perms,req.from,req.to,0,limit,'@timestamp','desc')
       indices_end   = Kelastic.index_range(req.from,req.to)
       result_end    = KelasticMulti.new(query_end,indices_end)
     end
@@ -377,7 +378,7 @@ class KibanaApp < Sinatra::Base
     count_end     = KelasticResponse.count_field(result_end.response,fields)
 
     query_begin   = SortedQuery.new(
-      req.search,req.from,req.to,0,limit,'@timestamp','asc')
+      req.search,@user_perms,req.from,req.to,0,limit,'@timestamp','asc')
     indices_begin = Kelastic.index_range(req.from,req.to).reverse
     result_begin  = KelasticMulti.new(query_begin,indices_begin)
     count_begin   = KelasticResponse.count_field(result_begin.response,fields)
@@ -410,7 +411,7 @@ class KibanaApp < Sinatra::Base
     req     = ClientRequest.new(params[:hash])
     fields = Array.new
     fields = params[:field].split(',,')
-    query   = TermsFacet.new(req.search,req.from,req.to,fields)
+    query   = TermsFacet.new(req.search,@user_perms,req.from,req.to,fields)
     indices = Kelastic.index_range(
       req.from,req.to,KibanaConfig::Facet_index_limit)
     result  = KelasticMultiFlat.new(query,indices)
@@ -427,7 +428,7 @@ class KibanaApp < Sinatra::Base
     limit = KibanaConfig::Analyze_limit
     show  = KibanaConfig::Analyze_show
     req     = ClientRequest.new(params[:hash])
-    query   = SortedQuery.new(req.search,req.from,req.to,0,limit)
+    query   = SortedQuery.new(req.search,@user_perms,req.from,req.to,0,limit)
     indices = Kelastic.index_range(req.from,req.to)
     result  = KelasticMulti.new(query,indices)
     fields = Array.new
@@ -455,7 +456,7 @@ class KibanaApp < Sinatra::Base
 
   get '/api/analyze/:field/mean/:hash' do
     req     = ClientRequest.new(params[:hash])
-    query   = StatsFacet.new(req.search,req.from,req.to,params[:field])
+    query   = StatsFacet.new(req.search,@user_perms,req.from,req.to,params[:field])
     indices = Kelastic.index_range(req.from,req.to,KibanaConfig::Facet_index_limit)
     type    = Kelastic.field_type(indices.first,params[:field])
     if ['long','integer','double','float'].include? type
@@ -487,7 +488,7 @@ class KibanaApp < Sinatra::Base
 
     # Build and execute
     req     = ClientRequest.new(params[:hash])
-    query   = SortedQuery.new(req.search,from,to,0,30)
+    query   = SortedQuery.new(req.search,@user_perms,from,to,0,30)
     indices = Kelastic.index_range(from,to)
     result  = KelasticMulti.new(query,indices)
     output  = JSON.generate(result.response)
@@ -506,7 +507,7 @@ class KibanaApp < Sinatra::Base
     to    = Time.now
 
     req     = ClientRequest.new(params[:hash])
-    query   = SortedQuery.new(req.search,from,to,0,count)
+    query   = SortedQuery.new(req.search,@user_perms,from,to,0,count)
     indices = Kelastic.index_range(from,to)
     result  = KelasticMulti.new(query,indices)
     flat    = KelasticResponse.flatten_response(result.response,req.fields)
