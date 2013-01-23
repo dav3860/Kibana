@@ -1,4 +1,4 @@
-require 'lib/modules/elasticsearchmod'
+require './lib/modules/elasticsearchmod'
 
 class UsersElasticSearch
   # Required function, accepts a KibanaConfig object

@@ -1,4 +1,4 @@
-require 'lib/modules/elasticsearchmod'
+require './lib/modules/elasticsearchmod'
 
 # class for storing permissions
 class Permissions

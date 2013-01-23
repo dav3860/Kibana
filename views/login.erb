@@ -20,7 +20,7 @@
     body {
     padding-top: 80px;
     padding-bottom: 40px;
-    background-image:url('../../images/grey.png');:
+    background-image:url('../../public/images/grey.png');:
     }
   </style>
   <link href="../../favicon.ico" rel="shortcut icon" type="image/x-icon" />
@@ -36,7 +36,7 @@
   <div class="hugeotron masthead">
     <div class="container">
       <div class=row>
-        <h1><img src='../../images/kibana_text.png'></h1>
+        <h1><img src='../../public/images/kibana_text.png'></h1>
         <p>Make sense of a mountain of logs</p>
         <% if locals[:login_message] %>
         <p><span class="label label-success"><%= locals[:login_message] %></span></p>
@@ -54,7 +54,7 @@
 
 <!--
   <div id="login" class="well">
-    <img src='../../images/kibana_login.png'>
+    <img src='../../public/images/kibana_login.png'>
     <form class="form-horizontal" action="/auth/login" method="POST">
       <% if locals[:login_message] %>
       <%= locals[:login_message] %><br>

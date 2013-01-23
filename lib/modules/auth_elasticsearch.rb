@@ -1,4 +1,4 @@
-require 'lib/modules/elasticsearchmod'
+require './lib/modules/elasticsearchmod'
 
 class AuthElasticSearch
   # Required function, accepts a KibanaConfig object
@@ -14,7 +14,7 @@ class AuthElasticSearch
 
     puts "Initializing elasticsearch for kibana auth..."
     # Make sure the default admin user is present
-    p = @@users_module.lookup_user(config::Auth_Admin_User)
+    p = lookup_user(config::Auth_Admin_User)
     if (p == nil)
       puts "Adding default admin user #{config::Auth_Admin_User} ..."
       add_user(config::Auth_Admin_User,config::Auth_Admin_Pass)
@@ -23,7 +23,7 @@ class AuthElasticSearch
 
   # Required function, authenticates a username/password
   def authenticate(username,password)
-    user = @@users_module.lookup_user(username)
+    user = lookup_user(username)
     return false if not user
     salt=user['salt']
     hashpass=Digest::SHA256.hexdigest(salt + password)
@@ -31,6 +31,11 @@ class AuthElasticSearch
       return true
     end
     return false
+  end
+
+  def lookup_user(username)
+    p = @uesm.get_by_id(username)
+    return p
   end
 end
 
