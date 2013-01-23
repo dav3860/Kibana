@@ -95,7 +95,7 @@ function getPage() {
   // Show the user an animated loading thingy
   setMeta('loading');
 
-  var sendhash = window.location.hash.replace(/^#/, '');;
+  var sendhash = encodeURIComponent(window.location.hash.replace(/^#/, ''));
 
   //Get the data and display it
   window.request = $.ajax({
@@ -104,7 +104,7 @@ function getPage() {
     cache: false,
     success: function (json) {
       // Make sure we're still on the same page
-      if (sendhash == window.location.hash.replace(/^#/, '')) {
+      if (sendhash == encodeURIComponent(window.location.hash.replace(/^#/, ''))) {
         //Parse out the result
         window.resultjson = JSON.parse(json);
 
@@ -136,7 +136,9 @@ function getPage() {
           resultjson.kibana.default_fields : window.hashjson.fields
 
         // Create 'Columns' section
-        $('#fields').html("<h5><i class='icon-columns'></i> Columns</h5>" +
+        $('#fields').html("<div class='input-prepend'>" +
+          "<span class='add-on'><i class='icon-columns'></i></span>" +
+          "<input id='field_filter' type='text' class='span' placeholder='Columns' /></div>" +
           "<ul class='unselected nav nav-pills nav-stacked'></ul>");
 
         var all_fields = array_unique(get_all_fields(resultjson).concat(fields))
@@ -151,6 +153,9 @@ function getPage() {
           fieldstr += sidebar_field_string(field_name,mode);
         }
         $('#fields ul.unselected').append(fieldstr)
+
+        // Store list of fields for filter use
+        window.field_list = $('#fields > ul > li');
 
         //var fieldstr = '';
         //for (var index in window.hashjson.fields) {
@@ -206,7 +211,7 @@ function getPage() {
 function getGraph(interval) {
 
   //generate the parameter for the php script
-  var sendhash = window.location.hash.replace(/^#/, '');
+  var sendhash = encodeURIComponent(window.location.hash.replace(/^#/, ''));
   var mode = window.hashjson.graphmode;
   window.segment = typeof window.segment === 'undefined' ? '' : window.segment;
   //Get the data and display it
@@ -216,7 +221,7 @@ function getGraph(interval) {
     cache: false,
     success: function (json) {
       // Make sure we're still on the same page
-      if (sendhash == window.location.hash.replace(/^#/, '')) {
+      if (sendhash == encodeURIComponent(window.location.hash.replace(/^#/, ''))) {
 
         //Parse out the returned JSON
         var graphjson = JSON.parse(json);
@@ -303,7 +308,7 @@ function analyzeField(field, mode) {
 
 function getID() {
   // Show the user an animated loading thingy
-  var sendhash = window.location.hash.replace(/^#/, '');
+  var sendhash = encodeURIComponent(window.location.hash.replace(/^#/, ''));
   //Get the data and display it
   window.request = $.ajax({
     url: "api/id/"+window.hashjson.id+"/"+window.hashjson.index,
@@ -335,7 +340,7 @@ function getID() {
 function getAnalysis() {
   setMeta('loading');
   //generate the parameter for the php script
-  var sendhash = window.location.hash.replace(/^#/, '');
+  var sendhash = encodeURIComponent(window.location.hash.replace(/^#/, ''));
   //Get the data and display it
   window.request = $.ajax({
     url: "api/analyze/" + window.hashjson.analyze_field + "/" +
@@ -344,7 +349,7 @@ function getAnalysis() {
     cache: false,
     success: function (json) {
       // Make sure we're still on the same page
-      if (sendhash == window.location.hash.replace(/^#/, '')) {
+      if (sendhash == encodeURIComponent(window.location.hash.replace(/^#/, ''))) {
 
         //Parse out the returned JSON
         var field = window.hashjson.analyze_field;
@@ -526,7 +531,7 @@ function analysisTable(resultjson) {
     var idv = object.id.split('||');
     var fields = window.hashjson.analyze_field.split(',,');
     for (var count = 0; count < fields.length; count++) {
-      metric[fields[count]]=idv[count];
+      metric[fields[count]]=xmlEnt(idv[count]);
     }
     var analyze_field = fields.join(' ')
     metric['Count'] = object.count;
@@ -542,7 +547,7 @@ function analysisTable(resultjson) {
           object.trend + '</span>';
       }
     }
-    metric['Action'] =  "<span class='raw'>" + object.id + "</span>"+
+    metric['Action'] =  "<span class='raw'>" + xmlEnt(object.id) + "</span>"+
       "<i data-mode='' data-field='" + analyze_field + "' "+
         "class='msearch icon-search icon-large jlink'></i> " +
       "<i data-mode='analysis' data-field='"+analyze_field+"' "+
@@ -571,7 +576,7 @@ function termsTable(resultjson) {
       if (typeof termv[count] === 'undefined' || termv[count] == "null" ) {
         var value = ''
       } else {
-        var value = termv[count]
+        var value = xmlEnt(termv[count])
       }
       metric[fields[count]] = value;
     }
@@ -580,7 +585,7 @@ function termsTable(resultjson) {
     metric['Percent'] =  Math.round(
       object.count / resultjson.hits.total * 10000
       ) / 100 + '%';
-    metric['Action'] =  "<span class='raw'>" + object.term + "</span>"+
+    metric['Action'] =  "<span class='raw'>" + xmlEnt(object.term) + "</span>"+
       "<i data-mode='' data-field='" + analyze_field + "' "+
         "class='msearch icon-search icon-large jlink'></i> " +
       "<i data-mode='analysis' data-field='"+analyze_field+"' "+
@@ -712,7 +717,7 @@ function microAnalysisTable (json,field,count) {
     var field_val = "<i class=icon-sign-blank style='color:"+colors[i]+"'></i> "+
     "<a class='jlink highlight_events' data-mode='value'"+
     " data-field='"+field+"' data-objid='"+objids+"'>"+show_val+"</a>";
-    var buttons = "<span class='raw'>" + value[0] + "</span>" +
+    var buttons = "<span class='raw'>" + xmlEnt(value[0]) + "</span>" +
               "<i class='jlink icon-large icon-search msearch'"+
               " data-action='' data-field='"+field+"'></i> " +
               "<i class='jlink icon-large icon-ban-circle msearch'"+
@@ -848,6 +853,11 @@ function CreateLogTable(objArray, fields, theme, enableHeader) {
   var i = 1;
   for (var objid in array) {
     var object = array[objid];
+    for(var key in object.highlight) {
+      var hlfield = key;
+      var hlvalue = object.highlight[hlfield];
+    }
+
     var id = object._id;
     var alt = i % 2 == 0 ? '' : 'alt'
     var time = prettyDateString(
@@ -858,12 +868,28 @@ function CreateLogTable(objArray, fields, theme, enableHeader) {
     str += '<td class=firsttd>' + time + '</td>';
     for (var index in fields) {
       var field = fields[index];
-      var value = get_field_value(object,field)
+      if (typeof hlfield === "undefined") 
+        var value = get_field_value(object,field);
+      else
+      {
+        if ( field.toString() == hlfield.toString() ) 
+          var value = hlvalue;
+        else
+          var value = get_field_value(object,field);
+      }
+
       var value = value === undefined ? "-" : value.toString();
+      var value = xmlEnt(wbr(value),10);
+      var value = value.replace(RegExp("@KIBANA_HIGHLIGHT_START@(.*?)@KIBANA_HIGHLIGHT_END@", "g"),
+	    function (all, text, char) {
+	      return "<span class='highlightedtext'>" + text + "</span>";
+	    }
+	);
       str += '<td class="column" data-field="'+field+'">' +
-        xmlEnt(wbr(value, 10)) + '</td>';
+        value + '</td>';
     }
     str += '</tr><tr class="hidedetails"></tr>';
+    hlfield = undefined;
     i++;
   }
 
@@ -901,11 +927,36 @@ function details_table(objid,theme) {
     var trclass = (i % 2 == 0) ?
       'class="alt '+field_id+'_row"' : 'class="'+field_id+'_row"';
 
-    str += "<tr " + trclass + ">" +
-      "<td class='firsttd " + field_id + "_field'>" + field + "</td>" +
-      "<td style='width: 60px'>" + buttons + "</td>" +
-      '<td>' + xmlEnt(wbr(value, 10)) +
-      "</td></tr>";
+    // Are URLs clickable ?
+    if (resultjson.kibana.clickable_urls) {
+      var value = value === undefined ? "-" : value.toString();
+      // Detect URLs and inserts delimiters
+      var value = value.replace(RegExp("(https?://([-\\w\\.]+)+(:\\d+)?(/([\\w/_\\.]*(\\?\\S+)?)?)?)", "g"),
+        function (all, text, char) {
+          return "@KIBANA_LINK_START@" + text + "@KIBANA_LINK_END@";
+        }
+      );
+      var value = xmlEnt(wbr(value),10);
+      // Replace delimiters by HTML code
+      var value = value.replace(RegExp("@KIBANA_LINK_START@(.*?)@KIBANA_LINK_END@", "g"), 
+        function (all, text) {
+          // Clean link
+          var stripped = text.replace( new RegExp("<del>&#8203;</del>","g"),"");
+          return "<a href='" + stripped + "' target='_blank'>" + text + "</a>";
+        }
+      );
+      str += "<tr " + trclass + ">" +
+	"<td class='firsttd " + field_id + "_field'>" + field + "</td>" +
+	"<td style='width: 60px'>" + buttons + "</td>" +
+	'<td>' + value +
+	"</td></tr>";
+    } else {
+      str += "<tr " + trclass + ">" +
+        "<td class='firsttd " + field_id + "_field'>" + field + "</td>" +
+        "<td style='width: 60px'>" + buttons + "</td>" +
+        '<td>' + xmlEnt(wbr(value, 10)) +
+        "</td></tr>";
+    }
 
     i++;
 
@@ -1035,11 +1086,11 @@ function mFields(field) {
 }
 
 function feedLinks(obj) {
-  return "<a href=rss/" + Base64.encode(JSON.stringify(obj)) +">rss " +
+  return "<a href=rss/" + Base64.encode(JSON.stringify(obj, null, '')) +">rss " +
     "<i class='icon-rss'></i></a> "+
-    "<a href=export/" + Base64.encode(JSON.stringify(obj)) + ">export " +
+    "<a href=export/" + Base64.encode(JSON.stringify(obj, null, '')) + ">export " +
     "<i class='icon-hdd'></i></a> "+
-    "<a href=stream#" + Base64.encode(JSON.stringify(obj)) + ">stream " +
+    "<a href=stream#" + Base64.encode(JSON.stringify(obj, null, '')) + ">stream " +
     "<i class='icon-dashboard'></i></a>"
 }
 
@@ -1072,7 +1123,7 @@ $(function () {
         window.hashjson.analyze_field = field;
     }
 
-    if (window.location.hash == "#" + JSON.stringify(window.hashjson))
+    if (window.location.hash == "#" + JSON.stringify(window.hashjson, null, ''))
       pageload(window.location.hash);
     else
       setHash(window.hashjson);
@@ -1648,6 +1699,27 @@ function bind_clicks() {
     mFields($(this).attr('data-field'));
   });
 
+  // Column filter
+  $("body").delegate('#field_filter','keyup',function(e){
+      var search = $(this).val().toLowerCase();
+      if (!search || e.keyCode == 27) { //esc key
+          $(this).val('');
+          window.field_list.show();
+          return;        
+      }
+      
+      window.field_list.hide();
+      var shown = window.field_list.filter(function(index) {
+          return ($(this).attr('data-field').toLowerCase().indexOf(search) !== -1);
+      }).show();
+      
+      if (shown.length == 1 && e.keyCode == 13) { // enter key
+          shown.children('i').click(); //toggle column
+          $(this).val('');
+          window.field_list.show();       
+      }
+  });
+
   $("body").delegate("span.related a.more", "click", function () {
     $('span.related span').show();
     $('span.related a.more').remove();
@@ -1665,7 +1737,7 @@ function bind_clicks() {
         ' field. Dismiss this notice to clear highlights.';
     if ($(this).attr('data-mode') == 'value')
       var notice = 'Highlighting <strong>'+objids.length+' events</strong>' +
-        ' where <strong>' + field + '</strong> is <strong>' + $(this).text() +
+        ' where <strong>' + field + '</strong> is <strong>' + xmlEnt($(this).text()) +
         '</strong>. Dismiss this notice to clear highlights.';
 
     $('#logs').prepend(

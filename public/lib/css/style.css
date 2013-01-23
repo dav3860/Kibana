@@ -77,6 +77,16 @@ background-color: #FFF;
 	margin: 0px;
 }
 
+.highlightedtext {
+   background: #FD7;
+   border-color: #960;
+   border-width: 1px;
+   border-style: solid;
+   padding: 0 2px;
+   margin: 0 2px;
+   box-shadow: 1px 1px 1px #CCC;
+}
+
 #logs td {
   word-wrap: break-word;
   font-size: 11px;
@@ -219,6 +229,10 @@ table.formatting td {
 
 #sidebar div.login {
   padding-bottom: 10px;
+}
+
+#field_filter {
+  width: 130px;
 }
 
 span.raw {
