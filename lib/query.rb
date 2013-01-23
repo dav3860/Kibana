@@ -138,7 +138,7 @@ end
 =end
 class HighlightedQuery < Query
   attr_accessor :query,:from,:to
-  def initialize(question, from, to, offset = 0, size = KibanaConfig::Per_page, field = "@timestamp", order = "desc")
+  def initialize(question, perms, from, to, offset = 0, size = KibanaConfig::Per_page, field = "@timestamp", order = "desc")
     super(question, from, to)
     @query['from'] = offset
     @query['size'] = size

@@ -307,7 +307,6 @@ class KibanaApp < Sinatra::Base
     segment = params[:segment].nil? ? 0 : params[:segment].to_i
 
     req     = ClientRequest.new(params[:hash])
-    puts req.to_s()
     if KibanaConfig::Highlight_results
       query   = HighlightedQuery.new(req.search,@user_perms,req.from,req.to,req.offset)
     else
