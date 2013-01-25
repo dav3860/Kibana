@@ -1585,6 +1585,9 @@ function populate_selectbox(selectbox, value, index) {
     cache: false,
     dataType: 'json',
     success: function( json ) {
+      json.sort(function(a, b) {
+        return a[value] == b[value] ? 0 : a[value] < b[value] ? -1 : 1
+      });
       $(selectbox).get(0).options.length = 0;
       $(selectbox).get(0).options[0] = new Option(selectMessage, "-1");
       $.each(json, function(idx, itm) {
