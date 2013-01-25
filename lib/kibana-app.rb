@@ -11,7 +11,11 @@ class KibanaApp < Sinatra::Base
     set :port, KibanaConfig::KibanaPort
     set :public_folder, File.join(File.dirname(__FILE__), '..', 'public')
     set :views, File.join(File.dirname(__FILE__), '..', 'views')
-    enable :sessions
+    use Rack::Session::Cookie, :key => 'session',
+                           :domain => 'intranet.prevoir',
+                           :path => '/',
+                           :expire_after => 900,
+                           :secret => 'K1b@na_s3cRet'
 	
 	@@users_module = nil
 	begin
