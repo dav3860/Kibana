@@ -1778,7 +1778,7 @@ function bind_clicks() {
   
     // validate and process form
     var name = $("input#addFavoriteInput").val();
-    if ((name.length <= 1) || (name.length >= 40)) {    
+    if ((name.length <= 1) || (name.length >= 50)) {
       $("#addFavoriteInput").addClass("error");
       return false;  
     }  
