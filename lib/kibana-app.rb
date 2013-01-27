@@ -14,8 +14,7 @@ class KibanaApp < Sinatra::Base
     use Rack::Session::Cookie, :key => 'session',
                            :domain => 'intranet.prevoir',
                            :path => '/',
-                           :expire_after => 900,
-                           :secret => 'K1b@na_s3cRet'
+                           :expire_after => 3600
 	
 	@@users_module = nil
 	begin
