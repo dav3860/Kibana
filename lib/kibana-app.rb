@@ -7,6 +7,7 @@ ruby_19 { require 'csv' }
 class KibanaApp < Sinatra::Base
 
   configure do
+    set :root, File.join(File.dirname(__FILE__), '..')
     set :bind, defined?(KibanaConfig::KibanaHost) ? KibanaConfig::KibanaHost : '0.0.0.0'
     set :port, KibanaConfig::KibanaPort
     set :public_folder, File.join(File.dirname(__FILE__), '..', 'public')
