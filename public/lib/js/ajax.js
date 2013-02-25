@@ -147,6 +147,7 @@ function getPage() {
         var fieldstr = '';
         for (var index in all_fields) {
           var field_name = all_fields[index].toString();
+          console.log("col : " + field_name + "\n");
           var afield = field_alias(field_name) + "_field";
           var mode = $.inArray(field_name,window.hashjson.fields) >= 0 ?
             'selected' : 'unselected'
@@ -914,9 +915,11 @@ function details_table(objid,theme) {
 
   var i = 1;
   for (index in obj_fields) {
-    var field = index
+    var field = index;
     var value = obj_fields[index];
     var field_id = field.replace('@', 'ATSYM');
+    field = field.replace(/ /g, '\\ ');
+    console.log("detail " + field + "\n");
     //var value = get_field_value(obj,field);
     var buttons = "<span class='raw'>" + xmlEnt(value) + "</span>" +
       "<i class='jlink icon-large icon-search msearch' " +
