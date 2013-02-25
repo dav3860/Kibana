@@ -548,7 +548,7 @@ class KibanaApp < Sinatra::Base
     sep   = KibanaConfig::Export_delimiter
 
     req     = ClientRequest.new(params[:hash])
-    query   = SortedQuery.new(req.search,req.from,req.to,0,count)
+    query   = SortedQuery.new(req.search,@user_perms,req.from,req.to,0,count)
     indices = Kelastic.index_range(req.from,req.to)
     result  = KelasticMulti.new(query,indices)
     flat    = KelasticResponse.flatten_response(result.response,req.fields)
